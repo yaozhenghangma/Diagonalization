@@ -1,27 +1,32 @@
 import numpy as np
 
 class SingleParticleHamiltonian:
-    def __init__(self, num_sites, num_total_orbs):
+    def __init__(self, num_sites, num_orbs_per_site, num_total_orbs):
         self.__total_orbs = num_total_orbs
         self.num_sites = num_sites
+        self.num_orbs_per_site = num_orbs_per_site
         self.Hamiltonian = np.zeros((num_total_orbs*2, num_total_orbs*2), dtype=np.complex128)
 
     def OnSite(self, on_site_matrix):
         # spin up
         for i in range(0, self.num_sites):
-            self.Hamiltonian[(i*3):(i*3+3), (i*3):(i*3+3)] = on_site_matrix
+            self.Hamiltonian[(i*self.num_orbs_per_site):(i*self.num_orbs_per_site+self.num_orbs_per_site),
+            (i*self.num_orbs_per_site):(i*self.num_orbs_per_site+self.num_orbs_per_site)] = on_site_matrix
 
         # spin down
         for i in range(0, self.num_sites):
-            self.Hamiltonian[(i*3+self.__total_orbs):(i*3+3+self.__total_orbs), (i*3+self.__total_orbs):(i*3+3+self.__total_orbs)] = on_site_matrix
+            self.Hamiltonian[(i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs),
+            (i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs)] = on_site_matrix
         return np.diag(self.Hamiltonian)
 
     def Hopping(self, hopping_matrix, site_m, site_n):
         # spin up
-        self.Hamiltonian[(site_m*3):(site_m*3+3), (site_n*3):(site_n*3+3)] += hopping_matrix
+        self.Hamiltonian[(site_m*self.num_orbs_per_site):(site_m*self.num_orbs_per_site+self.num_orbs_per_site),
+        (site_n*self.num_orbs_per_site):(site_n*self.num_orbs_per_site+self.num_orbs_per_site)] += hopping_matrix
 
         # spin down
-        self.Hamiltonian[(site_m*3+self.__total_orbs):(site_m*3+3+self.__total_orbs), (site_n*3+self.__total_orbs):(site_n*3+3+self.__total_orbs)] += hopping_matrix
+        self.Hamiltonian[(site_m*self.num_orbs_per_site+self.__total_orbs):(site_m*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs),
+        (site_n*self.num_orbs_per_site+self.__total_orbs):(site_n*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs)] += hopping_matrix
 
     def SOC(self, lambda_value):
         # we assume the orbitals of t2g are ordered as dyz dxz dxy

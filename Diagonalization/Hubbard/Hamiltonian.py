@@ -19,7 +19,7 @@ class Hubbard:
         return np.zeros((dim, dim)), dim
 
     def __InitBasis(self):
-        orbitals_list = list(range(0, self.num_orbs*2))
+        orbitals_list = list(range(0, self.__total_orbs*2))
         return list(itertools.combinations(orbitals_list, self.num_electrons))
 
     def OneSite(self, on_site_energy):
@@ -63,7 +63,7 @@ class Hubbard:
                 basis_n = set(self.basis[j])
                 if len(basis.symmetric_difference(basis_n)) == 4:
                     annihi = basis_n.difference(basis)
-                    create = basis.difference(basis)
+                    create = basis.difference(basis_n)
                     # intra orbital
                     for annihilation, creation in zip(intra_orbital_annihilation, intra_orbital_creation):
                         if create == creation and annihi == annihilation:
