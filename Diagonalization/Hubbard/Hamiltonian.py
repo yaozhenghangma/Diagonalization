@@ -16,7 +16,7 @@ class Hubbard:
 
     def __InitHamiltonian(self):
         dim = scipy.special.comb(self.__total_orbs*2, self.num_electrons, exact=True)
-        return np.zeros((dim, dim)), dim
+        return np.zeros((dim, dim), dtype=np.complex128), dim
 
     def __InitBasis(self):
         orbitals_list = list(range(0, self.__total_orbs*2))
