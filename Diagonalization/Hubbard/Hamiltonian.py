@@ -31,8 +31,10 @@ class Hubbard:
             for j in range(i+1, self.dimension):
                 diff_set = list(set(self.basis[i]).symmetric_difference(set(self.basis[j])))
                 if len(diff_set) == 2:
-                    self.Hamiltonian[i, j] += hopping_matrix[diff_set[0], diff_set[1]]
-                    self.Hamiltonian[j, i] += hopping_matrix[diff_set[0], diff_set[1]]
+                    create = list(set(self.basis[i]).difference(set(self.basis[j])))[0]
+                    annihi = list(set(self.basis[j]).difference(set(self.basis[i])))[0]
+                    self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                    self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
 
     def Hubbard(self, Hubbard_U=0, Hunt_J=0):
         Hubbard_U_prime = Hubbard_U - 2*Hunt_J
