@@ -14,12 +14,8 @@ def ChooseLowEnergy(eig_values, eig_vectors, index_states):
 
 
 def LowdinOrthonormalization(vectors):
-    overlap = np.matmul(vectors.T, vectors)
-    eig_values, eig_vectors = np.linalg.eigh(overlap)
-    eig_values = np.diag(eig_values)
-    sqrt_inv_eig = np.sqrt(np.linalg.inv(eig_values.astype(np.complex128)))
-    transform_s = np.dot(eig_vectors, np.dot(sqrt_inv_eig, eig_vectors.T))
-    return np.matmul(vectors, transform_s)
+    u, s, vh = np.linalg.svd(vectors, full_matrices=False)
+    return np.matmul(u, vh)
 
 
 def Project(eig_values, eig_vectors, projected_states):
@@ -29,6 +25,8 @@ def Project(eig_values, eig_vectors, projected_states):
             transform_U[i, j] = np.dot(eig_vectors[:, i].conj(), projected_states[:, j])
     #normalized_U, r = np.linalg.qr(transform_U)
     normalized_U = LowdinOrthonormalization(transform_U)
+    normalized_U[:, 1] = -normalized_U[:, 1]    # FIXME: unknown reason, antisymmetric form is favored
+    #normalized_U[:, 0] = -normalized_U[:, 0]
 
     projected_Hamiltonian = np.matmul(normalized_U.conj().T, np.matmul(np.diag(eig_values), normalized_U))
-    return projected_Hamiltonian, transform_U
+    return projected_Hamiltonian, normalized_U, transform_U

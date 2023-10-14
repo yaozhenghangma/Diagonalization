@@ -16,7 +16,7 @@ def InterOrbital(num_sites, num_orbs_per_site, total_orbs):
                 repulsion_list.append({j+k*num_orbs_per_site, i+k*num_orbs_per_site+total_orbs})
     return repulsion_list
 
-def InterOrbitalHunt(num_sites, num_orbs_per_site, total_orbs):
+def InterOrbitalHund(num_sites, num_orbs_per_site, total_orbs):
     repulsion_list = []
     for i in range(0, num_orbs_per_site):
         for j in range(i+1, num_orbs_per_site):
@@ -25,7 +25,7 @@ def InterOrbitalHunt(num_sites, num_orbs_per_site, total_orbs):
                 repulsion_list.append({i+k*num_orbs_per_site+total_orbs, j+k*num_orbs_per_site+total_orbs})
     return repulsion_list
 
-def IntraOrbitalHoppingHunt(num_sites, num_orbs_per_site, total_orbs):
+def IntraOrbitalHoppingHund(num_sites, num_orbs_per_site, total_orbs):
     annihilation_list = []
     creation_list = []
     for i in range(0, num_orbs_per_site):
@@ -39,7 +39,7 @@ def IntraOrbitalHoppingHunt(num_sites, num_orbs_per_site, total_orbs):
 
     return annihilation_list, creation_list
 
-def InterOrbitalHoppingHunt(num_sites, num_orbs_per_site, total_orbs):
+def InterOrbitalHoppingHund(num_sites, num_orbs_per_site, total_orbs):
     annihilation_list = []
     creation_list = []
     for i in range(0, num_orbs_per_site):
