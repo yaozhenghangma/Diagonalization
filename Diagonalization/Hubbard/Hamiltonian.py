@@ -33,8 +33,12 @@ class Hubbard:
                 if len(diff_set) == 2:
                     create = list(set(self.basis[i]).difference(set(self.basis[j])))[0]
                     annihi = list(set(self.basis[j]).difference(set(self.basis[i])))[0]
-                    self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
-                    self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
+                    if self.basis[i][0] == self.basis[j][0] or self.basis[i][1] == self.basis[j][1]:
+                        self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                        self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
+                    else:
+                        self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
+                        self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
 
     def Hubbard(self, Hubbard_U=0, Hund_J=0):
         Hubbard_U_prime = Hubbard_U - 2*Hund_J
