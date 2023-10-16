@@ -25,9 +25,11 @@ def Project(eig_values, eig_vectors, projected_states):
         for j in range(0, projected_states.shape[1]):
             transform_U[i, j] = np.dot(eig_vectors[:,i], projected_states[:,j])
     normalized_U = LowdinOrthonormalization(transform_U)
+    normalized_U[:, 0] = -normalized_U[:, 0]
+    print(normalized_U)
 
     projected_Hamiltonian = np.matmul(normalized_U.conj().T, np.matmul(np.diag(eig_values), normalized_U))
-    return projected_Hamiltonian, normalized_U
+    return projected_Hamiltonian, transform_U
 
 
 def TwoBand(t, U):
@@ -58,8 +60,13 @@ def TwoBand(t, U):
 
     eig_values, eig_vectors = LowEnergy(eig_values, eig_vectors)
 
+    print(eig_values)
+    #print(eig_vectors)
+
     projected_states = np.array([[0,0,1,0,0,0], [0,0,0,1,0,0], [1,0,0,0,0,0], [0,0,0,0,0,1]]).T
     projected_Hamiltonian, normalized_U = Project(eig_values, eig_vectors, projected_states)
+    print(projected_Hamiltonian)
+    print(normalized_U)
     return 2*projected_Hamiltonian[0, 1]
 
 U = 1.0
@@ -69,7 +76,7 @@ exact_diagonalization = []
 for t in np.arange(0, -0.2, -0.005):
     perturbation1.append(4*t*t/U)
     perturbation2.append(4*t*t/U-24*t*t*t*t/U/U/U)
-    exact_diagonalization.append(-TwoBand(t, U))
+    exact_diagonalization.append(TwoBand(t, U))
 
 font = {'family' : 'Times New Roman',
 'weight' : 'regular',
