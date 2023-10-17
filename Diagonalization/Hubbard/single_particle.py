@@ -1,11 +1,16 @@
 import numpy as np
+import sympy
 
 class SingleParticleHamiltonian:
-    def __init__(self, num_sites, num_orbs_per_site, num_total_orbs):
+    def __init__(self, num_sites, num_orbs_per_site, num_total_orbs, symbolic=False):
         self.__total_orbs = num_total_orbs
         self.num_sites = num_sites
         self.num_orbs_per_site = num_orbs_per_site
-        self.Hamiltonian = np.zeros((num_total_orbs*2, num_total_orbs*2), dtype=np.complex128)
+        self.__symbolic = symbolic
+        if symbolic:
+            self.Hamiltonian = sympy.Matrix.zeros(num_total_orbs*2, num_total_orbs*2)
+        else:
+            self.Hamiltonian = np.zeros((num_total_orbs*2, num_total_orbs*2), dtype=np.complex128)
 
     def OnSite(self, on_site_matrix):
         # spin up

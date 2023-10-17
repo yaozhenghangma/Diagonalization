@@ -1,22 +1,27 @@
 import itertools
 import numpy as np
 import scipy
+import sympy
 from Diagonalization.Hubbard.Coulomb import *
 
 
 class Hubbard:
-    def __init__(self, num_sites=1, num_orbs_per_site=1, num_electrons=1):
+    def __init__(self, num_sites=1, num_orbs_per_site=1, num_electrons=1, symbolic=False):
         self.num_sites = num_sites
         self.num_orbs_per_site = num_orbs_per_site
         self.num_orbs = np.full(num_sites, num_orbs_per_site)
         self.num_electrons = num_electrons
         self.__total_orbs = num_orbs_per_site * num_sites
+        self.__symbolic = symbolic
         self.Hamiltonian, self.dimension = self.__InitHamiltonian()
         self.basis = self.__InitBasis()
 
     def __InitHamiltonian(self):
         dim = scipy.special.comb(self.__total_orbs*2, self.num_electrons, exact=True)
-        return np.zeros((dim, dim), dtype=np.complex128), dim
+        if self.__symbolic:
+            return sympy.Matrix.zeros(dim, dim), dim
+        else:
+            return np.zeros((dim, dim), dtype=np.complex128), dim
 
     def __InitBasis(self):
         orbitals_list = list(range(0, self.__total_orbs*2))
@@ -41,8 +46,14 @@ class Hubbard:
                         self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
 
     def Hubbard(self, Hubbard_U=0, Hund_J=0):
-        Hubbard_U_prime = Hubbard_U - 2*Hund_J
-        Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
+        if self.__symbolic:
+            Hubbard_U = sympy.symbols('U')
+            Hund_J = sympy.symbols("J_H")
+            Hubbard_U_prime = Hubbard_U - 2*Hund_J
+            Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
+        else:
+            Hubbard_U_prime = Hubbard_U - 2*Hund_J
+            Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
         intra_orbital_list = IntraOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
         inter_orbital_list = InterOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
         inter_orbital_hund_list = InterOrbitalHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
