@@ -35,21 +35,33 @@ def TwoSiteJ(basis, symbolic=False):
     # up-dn
     for i in range(0, 3):
         for j in range(0, 3):
-            state1 += up_weight1[i] * dn_weight2[j] * ChooseState(basis, {up_orbs1[i], dn_orbs2[j]})
+            if up_orbs1[i] < dn_orbs2[j]:
+                state1 += up_weight1[i] * dn_weight2[j] * ChooseState(basis, {up_orbs1[i], dn_orbs2[j]})
+            else:
+                state1 -= up_weight1[i] * dn_weight2[j] * ChooseState(basis, {up_orbs1[i], dn_orbs2[j]})
 
     # dn-up
     for i in range(0, 3):
         for j in range(0, 3):
-            state2 += dn_weight1[i] * up_weight2[j] * ChooseState(basis, {dn_orbs1[i], up_orbs2[j]})
+            if dn_orbs1[i] < up_orbs2[j]:
+                state2 += dn_weight1[i] * up_weight2[j] * ChooseState(basis, {dn_orbs1[i], up_orbs2[j]})
+            else:
+                state2 -= dn_weight1[i] * up_weight2[j] * ChooseState(basis, {dn_orbs1[i], up_orbs2[j]})
 
     # up-up
     for i in range(0, 3):
         for j in range(0, 3):
-            state3 += up_weight1[i] * up_weight2[j] * ChooseState(basis, {up_orbs1[i], up_orbs2[j]})
+            if up_orbs1[i] < up_orbs2[j]:
+                state3 += up_weight1[i] * up_weight2[j] * ChooseState(basis, {up_orbs1[i], up_orbs2[j]})
+            else:
+                state3 -= up_weight1[i] * up_weight2[j] * ChooseState(basis, {up_orbs1[i], up_orbs2[j]})
 
     # dn-dn
     for i in range(0, 3):
         for j in range(0, 3):
-            state4 += dn_weight1[i] * dn_weight2[j] * ChooseState(basis, {dn_orbs1[i], dn_orbs2[j]})
+            if dn_orbs1[i] < dn_orbs2[j]:
+                state4 += dn_weight1[i] * dn_weight2[j] * ChooseState(basis, {dn_orbs1[i], dn_orbs2[j]})
+            else:
+                state4 -= dn_weight1[i] * dn_weight2[j] * ChooseState(basis, {dn_orbs1[i], dn_orbs2[j]})
 
     return np.hstack((state3, state1, state2, state4))
