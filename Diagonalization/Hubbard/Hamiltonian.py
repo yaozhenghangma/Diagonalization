@@ -7,6 +7,7 @@ from Diagonalization.Hubbard.Coulomb import *
 
 class Hubbard:
     def __init__(self, num_sites=1, num_orbs_per_site=1, num_electrons=1, symbolic=False):
+        self.__ligand = False
         self.num_sites = num_sites
         self.num_orbs_per_site = num_orbs_per_site
         self.num_orbs = np.full(num_sites, num_orbs_per_site)
@@ -15,6 +16,17 @@ class Hubbard:
         self.__symbolic = symbolic
         self.Hamiltonian, self.dimension = self.__InitHamiltonian()
         self.basis = self.__InitBasis()
+
+    def Ligand(self, num_ligands=1, num_orbs_per_ligand=1):
+        if not self.__ligand:
+            self.__ligand = True
+            self.num_ligands = num_ligands
+            self.num_orbs_per_ligand = num_orbs_per_ligand
+            self.num_orbs = np.hstack((self.num_orbs, np.full(num_ligands, num_orbs_per_ligand)))
+            self.__total_orbs += num_orbs_per_ligand * num_ligands
+            self.Hamiltonian, self.dimension = self.__InitHamiltonian()
+            self.basis = self.__InitBasis()
+
 
     def __InitHamiltonian(self):
         dim = scipy.special.comb(self.__total_orbs*2, self.num_electrons, exact=True)
