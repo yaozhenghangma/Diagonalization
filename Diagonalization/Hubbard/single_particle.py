@@ -2,15 +2,25 @@ import numpy as np
 import sympy
 
 class SingleParticleHamiltonian:
-    def __init__(self, num_sites, num_orbs_per_site, num_total_orbs, symbolic=False):
-        self.__total_orbs = num_total_orbs
+    def __init__(self, num_sites, num_orbs_per_site, symbolic=False):
+        self.__ligand = False
+        self.__total_orbs = num_sites * num_orbs_per_site
         self.num_sites = num_sites
         self.num_orbs_per_site = num_orbs_per_site
         self.__symbolic = symbolic
         if symbolic:
-            self.Hamiltonian = sympy.Matrix.zeros(num_total_orbs*2, num_total_orbs*2)
+            self.Hamiltonian = sympy.Matrix.zeros(self.__total_orbs*2, self.__total_orbs*2)
         else:
-            self.Hamiltonian = np.zeros((num_total_orbs*2, num_total_orbs*2), dtype=np.complex128)
+            self.Hamiltonian = np.zeros((self.__total_orbs*2, self.__total_orbs*2), dtype=np.complex128)
+
+    def Ligand(self, num_ligands, num_orbs_per_ligand):
+        if not self.__ligand:
+            self.__ligand = True
+            self.num_ligands = num_ligands
+            self.num_orbs_per_ligand = num_orbs_per_ligand
+            self.__central_orbs = self.__total_orbs
+            self.__total_orbs += num_orbs_per_ligand * num_ligands
+            self.Hamiltonian = np.zeros((self.__total_orbs*2, self.__total_orbs*2), dtype=np.complex128)
 
     def OnSite(self, on_site_matrix):
         # spin up
@@ -22,6 +32,23 @@ class SingleParticleHamiltonian:
         for i in range(0, self.num_sites):
             self.Hamiltonian[(i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs),
             (i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs)] = on_site_matrix
+        return np.diag(self.Hamiltonian)
+
+    def OnSiteLigand(self, on_site_matrix):
+        # spin up
+        for i in range(0, self.num_ligands):
+            self.Hamiltonian[(i * self.num_orbs_per_site + self.__central_orbs):(
+                    i * self.num_orbs_per_site + self.num_orbs_per_site + self.__central_orbs),
+            (i * self.num_orbs_per_site + self.__central_orbs):(
+                    i * self.num_orbs_per_site + self.num_orbs_per_site + self.__central_orbs)] = on_site_matrix
+
+        # spin down
+        for i in range(0, self.num_ligands):
+            self.Hamiltonian[(i * self.num_orbs_per_site + self.__total_orbs + self.__central_orbs):(
+                        i * self.num_orbs_per_site + self.num_orbs_per_site + self.__total_orbs + self.__central_orbs),
+            (i * self.num_orbs_per_site + self.__total_orbs + self.__central_orbs):(
+                        i * self.num_orbs_per_site + self.num_orbs_per_site + self.__total_orbs + self.__central_orbs)]\
+                = on_site_matrix
         return np.diag(self.Hamiltonian)
 
     def Hopping(self, hopping_matrix, site_m, site_n):
