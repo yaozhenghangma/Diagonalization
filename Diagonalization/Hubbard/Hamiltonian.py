@@ -106,3 +106,59 @@ class Hubbard:
                             self.Hamiltonian[i, j] += Hund_J
                         if create == annihilation and annihi == creation:
                             self.Hamiltonian[j, i] += Hund_J
+
+    def Hubbard_ligand(self, Hubbard_U=0, Hund_J=0):
+        Hubbard_U_prime = Hubbard_U - 2 * Hund_J
+        Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
+
+        shift = self.num_sites * self.num_orbs_per_site
+        intra_orbital_list = IntraOrbital(self.num_ligands, self.num_orbs_per_ligand, self.__total_orbs, shift=shift)
+        inter_orbital_list = InterOrbital(self.num_ligands, self.num_orbs_per_ligand, self.__total_orbs, shift=shift)
+        inter_orbital_hund_list = InterOrbitalHund(self.num_ligands,
+                                                   self.num_orbs_per_ligand,
+                                                   self.__total_orbs,
+                                                   shift=shift)
+        intra_orbital_annihilation, intra_orbital_creation = IntraOrbitalHoppingHund(self.num_ligands,
+                                                                                     self.num_orbs_per_ligand,
+                                                                                     self.__total_orbs,
+                                                                                     shift=shift)
+        inter_orbital_annihilation, inter_orbital_creation = InterOrbitalHoppingHund(self.num_ligands,
+                                                                                     self.num_orbs_per_ligand,
+                                                                                     self.__total_orbs,
+                                                                                     shift=shift)
+
+        for i in range(0, self.dimension):
+            basis = set(self.basis[i])
+            # intra orbital
+            for repulsion in intra_orbital_list:
+                if repulsion.issubset(basis):
+                    self.Hamiltonian[i, i] += Hubbard_U
+
+            # inter orbital
+            for repulsion in inter_orbital_list:
+                if repulsion.issubset(basis):
+                    self.Hamiltonian[i, i] += Hubbard_U_prime
+
+            # inter orbital
+            for repulsion in inter_orbital_hund_list:
+                if repulsion.issubset(basis):
+                    self.Hamiltonian[i, i] += Hubbard_U_prime_minus_Hund_j
+
+            for j in range(i+1, self.dimension):
+                basis_n = set(self.basis[j])
+                if len(basis.symmetric_difference(basis_n)) == 4:
+                    annihi = basis_n.difference(basis)
+                    create = basis.difference(basis_n)
+                    # intra orbital
+                    for annihilation, creation in zip(intra_orbital_annihilation, intra_orbital_creation):
+                        if create == creation and annihi == annihilation:
+                            self.Hamiltonian[i, j] += Hund_J
+                        if create == annihilation and annihi == creation:
+                            self.Hamiltonian[j, i] += Hund_J
+
+                    # inter orbital
+                    for annihilation, creation in zip(inter_orbital_annihilation, inter_orbital_creation):
+                        if create == creation and annihi == annihilation:
+                            self.Hamiltonian[i, j] += Hund_J
+                        if create == annihilation and annihi == creation:
+                            self.Hamiltonian[j, i] += Hund_J
