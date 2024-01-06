@@ -16,6 +16,16 @@ def InterOrbital(num_sites, num_orbs_per_site, total_orbs, shift=0):
                 repulsion_list.append({j+k*num_orbs_per_site+shift, i+k*num_orbs_per_site+total_orbs+shift})
     return repulsion_list
 
+def CentralAndLigand(central_orbs, ligand_orbs, total_orbs):
+    repulsion_list = []
+    for ic in central_orbs:
+        for il in ligand_orbs:
+            repulsion_list.append({ic, il})
+            repulsion_list.append({ic+total_orbs, il})
+            repulsion_list.append({ic, il+total_orbs})
+            repulsion_list.append({ic+total_orbs, il+total_orbs})
+    return repulsion_list
+
 def InterOrbitalHund(num_sites, num_orbs_per_site, total_orbs, shift=0):
     repulsion_list = []
     for i in range(0, num_orbs_per_site):

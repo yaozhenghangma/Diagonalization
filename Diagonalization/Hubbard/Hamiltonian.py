@@ -162,3 +162,16 @@ class Hubbard:
                             self.Hamiltonian[i, j] += Hund_J
                         if create == annihilation and annihi == creation:
                             self.Hamiltonian[j, i] += Hund_J
+
+    def HubbardCentralAndLigand(self, Hubbard_U=0):
+        num_central_orbs = self.num_sites * self.num_orbs_per_site
+        num_ligand_orbs = self.num_ligands * self.num_orbs_per_ligand
+        central_orbs = list(range(0, num_central_orbs))
+        ligand_orbs = list(range(num_central_orbs, num_central_orbs + num_ligand_orbs))
+        repulsion_list = CentralAndLigand(central_orbs, ligand_orbs, self.__total_orbs)
+        for i in range(0, self.dimension):
+            basis = set(self.basis[i])
+            # intra orbital
+            for repulsion in repulsion_list:
+                if repulsion.issubset(basis):
+                    self.Hamiltonian[i, i] += Hubbard_U
