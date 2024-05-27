@@ -43,19 +43,153 @@ class Hubbard:
         for i in range(0, self.dimension):
             self.Hamiltonian[i, i] += np.sum(on_site_energy[list(self.basis[i])])
 
-    def Hopping(self, hopping_matrix):
+    def SOCd7(self, lam=0, to=5, shift=0):
+        soc_basis = [
+            {0+shift,        1+shift,         2+shift},
+            {0+shift,        1+shift,         3+shift},
+            {0+shift,        1+shift,         4+shift},
+            {0+shift,        1+shift,         2+shift+to},
+            {0+shift,        1+shift,         3+shift+to},
+            {0+shift,        1+shift,         4+shift+to},
+            {0+shift,        1+shift+to,      2+shift},
+            {0+shift,        1+shift+to,      3+shift},
+            {0+shift,        1+shift+to,      4+shift},
+            {0+shift,        1+shift+to,      2+shift+to},
+            {0+shift,        1+shift+to,      3+shift+to},
+            {0+shift,        1+shift+to,      4+shift+to},
+            {0+shift+to,     1+shift,         2+shift},
+            {0+shift+to,     1+shift,         3+shift},
+            {0+shift+to,     1+shift,         4+shift},
+            {0+shift+to,     1+shift,         2+shift+to},
+            {0+shift+to,     1+shift,         3+shift+to},
+            {0+shift+to,     1+shift,         4+shift+to},
+            {0+shift+to,     1+shift+to,      2+shift},
+            {0+shift+to,     1+shift+to,      3+shift},
+            {0+shift+to,     1+shift+to,      4+shift},
+            {0+shift+to,     1+shift+to,      2+shift+to},
+            {0+shift+to,     1+shift+to,      3+shift+to},
+            {0+shift+to,     1+shift+to,      4+shift+to},
+        ]
+        site_orbitals = {
+            0+shift,
+            1+shift,
+            2+shift,
+            3+shift,
+            4+shift,
+            0 + shift+to,
+            1 + shift+to,
+            2 + shift+to,
+            3 + shift+to,
+            4 + shift+to
+        }
+        s3 = np.sqrt(3)
+        s3j = np.sqrt(3) * 1j
+        s32 = np.sqrt(3)*2
+        #soc_matrix = lam * np.array(
+        #    [
+        #        #[     1,     2,     3,     4,     5,     6,     7,     8,     9,    10,    11,    12,    13,    14,    15,    16,    17,    18,    19,    20,    21,    22,    23,    24]
+        #        [     0, -3j/2,     0,     0,     0,  s3/2,     0,     0,  s3/2,     0,     0,     0,     0,     0,  s3/2,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+        #        [  3j/2,     0,     0,     0,     0,-s3j/2,     0,     0,-s3j/2,     0,     0,     0,     0,     0,-s3j/2,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+        #        [     0,     0,     0, -s3/2, s3j/2,     0, -s3/2, s3j/2,     0,     0,     0,     0, -s3/2, s3j/2,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+        #        [     0,     0,-1/s32,     0, -1j/2,     0,     0,     0,     0,     0,     0,   2/3,     0,     0,     0,     0,     0,   1/6,     0,     0,   1/6,     0,     0,     0],
+        #        [     0,     0,-1j/s32, 1j/2,     0,     0,     0,     0,     0,     0,     0, -2j/3,     0,     0,     0,     0,     0, -1j/6,     0,     0, -1j/6,     0,     0,     0],
+        #        [ 1/s32,1j/s32,     0,     0,     0,     0,     0,     0,     0,  -2/3,  2j/3,     0,     0,     0,     0,  -1/6,  1j/6,     0,  -1/6,  1j/6,     0,     0,     0,     0],
+        #        [     0,     0,-1/s32,     0,     0,     0,     0, -1j/2,     0,     0,     0,   1/6,     0,     0,     0,     0,     0,   2/3,     0,     0,   1/6,     0,     0,     0],
+        #        [     0,     0,-1j/s32,    0,     0,     0,  1j/2,     0,     0,     0,     0, -1j/6,     0,     0,     0,     0,     0, -2j/3,     0,     0, -1j/6,     0,     0,     0],
+        #        [ 1/s32,1j/s32,     0,     0,     0,     0,     0,     0,     0,  -1/6,  1j/6,     0,     0,     0,     0,  -2/3,  2j/3,     0,  -1/6,  1j/6,     0,     0,     0,     0],
+        #        [     0,     0,     0,     0,     0,  -2/3,     0,     0,  -1/6,     0,  1j/2,     0,     0,     0,  -1/6,     0,     0,     0,     0,     0,     0,     0,     0, 1/s32],
+        #        [     0,     0,     0,     0,     0, -2j/3,     0,     0, -1j/6, -1j/2,     0,     0,     0,     0, -1j/6,     0,     0,     0,     0,     0,     0,     0,     0,-1j/s32],
+        #        [     0,     0,     0,   2/3,  2j/3,     0,   1/6,  1j/6,     0,     0,     0,     0,   1/6,  1j/6,     0,     0,     0,     0,     0,     0,     0,-1/s32,1j/s32,     0],
+        #        [     0,     0,-1/s32,     0,     0,     0,     0,     0,     0,     0,     0,   1/6,     0, -1j/2,     0,     0,     0,   1/6,     0,     0,   2/3,     0,     0,     0],
+        #        [     0,     0,-1j/s32,    0,     0,     0,     0,     0,     0,     0,     0, -1j/6,  1j/2,     0,     0,     0,     0, -1j/6,     0,     0, -2j/3,     0,     0,     0],
+        #        [ 1/s32,1j/s32,     0,     0,     0,     0,     0,     0,     0,  -1/6,  1j/6,     0,     0,     0,     0,  -1/6,  1j/6,     0,  -2/3,  2j/3,     0,     0,     0,     0],
+        #        [     0,     0,     0,     0,     0,  -1/6,     0,     0,  -2/3,     0,     0,     0,     0,     0,  -1/6,     0,  1j/2,     0,     0,     0,     0,     0,     0, 1/s32],
+        #        [     0,     0,     0,     0,     0, -1j/6,     0,     0, -2j/3,     0,     0,     0,     0,     0, -1j/6, -1j/2,     0,     0,     0,     0,     0,     0,     0,-1j/s32],
+        #        [     0,     0,     0,   1/6,  1j/6,     0,   2/3,  2j/3,     0,     0,     0,     0,   1/6,  1j/6,     0,     0,     0,     0,     0,     0,     0,-1/s32,1j/s32,     0],
+        #        [     0,     0,     0,     0,     0,  -1/6,     0,     0,  -1/6,     0,     0,     0,     0,     0,  -2/3,     0,     0,     0,     0,  1j/2,     0,     0,     0, 1/s32],
+        #        [     0,     0,     0,     0,     0, -1j/6,     0,     0, -1j/6,     0,     0,     0,     0,     0, -2j/3,     0,     0,     0, -1j/2,     0,     0,     0,     0,-1j/s32],
+        #        [     0,     0,     0,   1/6,  1j/6,     0,   1/6,  1j/6,     0,     0,     0,     0,   2/3,  2j/3,     0,     0,     0,     0,     0,     0,     0,-1/s32,1j/s32,     0],
+        #        [     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0, -s3/2,     0,     0,     0,     0,     0, -s3/2,     0,     0, -s3/2,     0,  3j/2,     0],
+        #        [     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,-s3j/2,     0,     0,     0,     0,     0,-s3j/2,     0,     0,-s3j/2, -3j/2,     0,     0],
+        #        [     0,     0,     0,     0,     0,     0,     0,     0,     0,  s3/2, s3j/2,     0,     0,     0,     0,  s3/2, s3j/2,     0,  s3/2, s3j/2,     0,     0,     0,     0]],
+        #    dtype=np.complex128)
+        soc_matrix = lam * np.array(
+            [
+                # [     1,     2,     3,     4,     5,     6,     7,     8,     9,    10,    11,    12,    13,    14,    15,    16,    17,    18,    19,    20,    21,    22,    23,    24]
+                [      0, -3j/2,     0,     0,     0,  -1/2,     0,     0,  -1/2,     0,     0,     0,     0,     0,  -1/2,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+                [   3j/2,     0,     0,     0,     0,  1j/2,     0,     0,  1j/2,     0,     0,     0,     0,     0,  1j/2,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+                [      0,     0,     0,   1/2, -1j/2,     0,   1/2, -1j/2,     0,     0,     0,     0,   1/2, -1j/2,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0],
+                [      0,     0,   1/2,     0, -1j/2,     0,     0,     0,     0,     0,     0,   2/3,     0,     0,     0,     0,     0,   1/6,     0,     0,   1/6,     0,     0,     0],
+                [      0,     0,  1j/2,  1j/2,     0,     0,     0,     0,     0,     0,     0, -2j/3,     0,     0,     0,     0,     0, -1j/6,     0,     0, -1j/6,     0,     0,     0],
+                [   -1/2, -1j/2,     0,     0,     0,     0,     0,     0,     0,  -2/3,  2j/3,     0,     0,     0,     0,  -1/6,  1j/6,     0,  -1/6,  1j/6,     0,     0,     0,     0],
+                [      0,     0,   1/2,     0,     0,     0,     0, -1j/2,     0,     0,     0,   1/6,     0,     0,     0,     0,     0,   2/3,     0,     0,   1/6,     0,     0,     0],
+                [      0,     0,  1j/2,     0,     0,     0,  1j/2,     0,     0,     0,     0, -1j/6,     0,     0,     0,     0,     0, -2j/3,     0,     0, -1j/6,     0,     0,     0],
+                [   -1/2, -1j/2,     0,     0,     0,     0,     0,     0,     0,  -1/6,  1j/6,     0,     0,     0,     0,  -2/3,  2j/3,     0,  -1/6,  1j/6,     0,     0,     0,     0],
+                [      0,     0,     0,     0,     0,  -2/3,     0,     0,  -1/6,     0,  1j/2,     0,     0,     0,  -1/6,     0,     0,     0,     0,     0,     0,     0,     0,  -1/2],
+                [      0,     0,     0,     0,     0, -2j/3,     0,     0, -1j/6, -1j/2,     0,     0,     0,     0, -1j/6,     0,     0,     0,     0,     0,     0,     0,     0,  1j/2],
+                [      0,     0,     0,   2/3,  2j/3,     0,   1/6,  1j/6,     0,     0,     0,     0,   1/6,  1j/6,     0,     0,     0,     0,     0,     0,     0,   1/2, -1j/2,     0],
+                [      0,     0,   1/2,     0,     0,     0,     0,     0,     0,     0,     0,   1/6,     0, -1j/2,     0,     0,     0,   1/6,     0,     0,   2/3,     0,     0,     0],
+                [      0,     0,  1j/2,     0,     0,     0,     0,     0,     0,     0,     0, -1j/6,  1j/2,     0,     0,     0,     0, -1j/6,     0,     0, -2j/3,     0,     0,     0],
+                [   -1/2, -1j/2,     0,     0,     0,     0,     0,     0,     0,  -1/6,  1j/6,     0,     0,     0,     0,  -1/6,  1j/6,     0,  -2/3,  2j/3,     0,     0,     0,     0],
+                [      0,     0,     0,     0,     0,  -1/6,     0,     0,  -2/3,     0,     0,     0,     0,     0,  -1/6,     0,  1j/2,     0,     0,     0,     0,     0,     0,  -1/2],
+                [      0,     0,     0,     0,     0, -1j/6,     0,     0, -2j/3,     0,     0,     0,     0,     0, -1j/6, -1j/2,     0,     0,     0,     0,     0,     0,     0,  1j/2],
+                [      0,     0,     0,   1/6,  1j/6,     0,   2/3,  2j/3,     0,     0,     0,     0,   1/6,  1j/6,     0,     0,     0,     0,     0,     0,     0,   1/2, -1j/2,     0],
+                [      0,     0,     0,     0,     0,  -1/6,     0,     0,  -1/6,     0,     0,     0,     0,     0,  -2/3,     0,     0,     0,     0,  1j/2,     0,     0,     0,  -1/2],
+                [      0,     0,     0,     0,     0, -1j/6,     0,     0, -1j/6,     0,     0,     0,     0,     0, -2j/3,     0,     0,     0, -1j/2,     0,     0,     0,     0,  1j/2],
+                [      0,     0,     0,   1/6,  1j/6,     0,   1/6,  1j/6,     0,     0,     0,     0,   2/3,  2j/3,     0,     0,     0,     0,     0,     0,     0,   1/2, -1j/2,     0],
+                [      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,   1/2,     0,     0,     0,     0,     0,   1/2,     0,     0,   1/2,     0,  3j/2,     0],
+                [      0,     0,     0,     0,     0,     0,     0,     0,     0,     0,     0,  1j/2,     0,     0,     0,     0,     0,  1j/2,     0,     0,  1j/2, -3j/2,     0,     0],
+                [      0,     0,     0,     0,     0,     0,     0,     0,     0,  -1/2, -1j/2,     0,     0,     0,     0,  -1/2, -1j/2,     0,  -1/2, -1j/2,     0,     0,     0,     0]
+            ],
+            dtype=np.complex128)
+        #count = 0
+        for i_soc in range(0,24):
+            for j_soc in range(0, 24):
+                if soc_matrix[i_soc, j_soc] != 0:
+                    for i in range(0, self.dimension):
+                        #print(self.basis[i], soc_basis[i_soc], list(set(self.basis[i])) == soc_basis[i_soc])
+                        if set(self.basis[i]).intersection(site_orbitals) == soc_basis[i_soc]:
+                            for j in range(0, self.dimension):
+                                if set(self.basis[j]).intersection(site_orbitals) == soc_basis[j_soc] and set(self.basis[i]).difference(site_orbitals) == set(self.basis[j]).difference(site_orbitals):
+                                    #count += 1
+                                    self.Hamiltonian[i, j] += soc_matrix[i_soc, j_soc]
+                                    break
+                            #break
+        #print(count)
+
+
+    def Hopping(self, hopping_matrix, sign=True):
         for i in range(0, self.dimension):
             for j in range(i+1, self.dimension):
                 diff_set = list(set(self.basis[i]).symmetric_difference(set(self.basis[j])))
                 if len(diff_set) == 2:
                     create = list(set(self.basis[i]).difference(set(self.basis[j])))[0]
                     annihi = list(set(self.basis[j]).difference(set(self.basis[i])))[0]
-                    if self.basis[i][0] == self.basis[j][0] or self.basis[i][1] == self.basis[j][1]:
-                        self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
-                        self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
+                    if sign:
+                        if self.basis[i][0] == self.basis[j][0] or self.basis[i][1] == self.basis[j][1]:
+                            self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
+                        else:
+                            self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
                     else:
-                        self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
-                        self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
+                        si = False
+                        for i_bi in self.basis[i]:
+                            if i_bi == create:
+                                break
+                            else:
+                                si = not si
+                        for i_bj in self.basis[j]:
+                            if i_bj == annihi:
+                                break
+                            else:
+                                si = not si
+                        if si:
+                            self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
+                        else:
+                            self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
 
     def Hubbard(self, Hubbard_U=0, Hund_J=0):
         if self.__symbolic:
@@ -66,6 +200,8 @@ class Hubbard:
         else:
             Hubbard_U_prime = Hubbard_U - 2*Hund_J
             Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
+            #Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime
+            #Hund_J = 0
         intra_orbital_list = IntraOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
         inter_orbital_list = InterOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
         inter_orbital_hund_list = InterOrbitalHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
@@ -89,23 +225,99 @@ class Hubbard:
                     self.Hamiltonian[i, i] += Hubbard_U_prime_minus_Hund_j
 
             for j in range(i+1, self.dimension):
+                #print(i, j)
                 basis_n = set(self.basis[j])
                 if len(basis.symmetric_difference(basis_n)) == 4:
                     annihi = basis_n.difference(basis)
                     create = basis.difference(basis_n)
                     # intra orbital
                     for annihilation, creation in zip(intra_orbital_annihilation, intra_orbital_creation):
+                        #print(annihilation, creation)
                         if create == creation and annihi == annihilation:
-                            self.Hamiltonian[i, j] += Hund_J
+                            #print(create)
+                            sign = False
+                            for i_create in sorted(list(create), reverse=True):
+                                for i_bi in self.basis[i]:
+                                    if i_bi == i_create:
+                                        break
+                                    else:
+                                        sign = not sign
+                            for i_annihi in sorted(list(annihi), reverse=True):
+                                for i_bj in self.basis[j]:
+                                    if i_bj == i_annihi:
+                                        break
+                                    else:
+                                        sign = not sign
+                            #print(sign)
+                            sign = True
+                            if sign:
+                                self.Hamiltonian[i, j] -= Hund_J
+                            else:
+                                self.Hamiltonian[i, j] += Hund_J
+
                         if create == annihilation and annihi == creation:
-                            self.Hamiltonian[j, i] += Hund_J
+                            #print(create)
+                            sign = False
+                            for i_create in sorted(list(create), reverse=True):
+                                for i_bj in self.basis[j]:
+                                    if i_bj == i_create:
+                                        break
+                                    else:
+                                        sign = not sign
+                            for i_annihi in sorted(list(annihi), reverse=True):
+                                for i_bi in self.basis[i]:
+                                    if i_bi == i_annihi:
+                                        break
+                                    else:
+                                        sign = not sign
+                            #print(sign)
+                            sign = True
+                            if sign:
+                                self.Hamiltonian[j, i] -= Hund_J
+                            else:
+                                self.Hamiltonian[j, i] += Hund_J
 
                     # inter orbital
                     for annihilation, creation in zip(inter_orbital_annihilation, inter_orbital_creation):
                         if create == creation and annihi == annihilation:
-                            self.Hamiltonian[i, j] += Hund_J
+                            sign = False
+                            for i_create in sorted(list(create), reverse=True):
+                                for i_bi in self.basis[i]:
+                                    if i_bi == i_create:
+                                        break
+                                    else:
+                                        sign = not sign
+                            for i_annihi in sorted(list(annihi), reverse=True):
+                                for i_bj in self.basis[j]:
+                                    if i_bj == i_annihi:
+                                        break
+                                    else:
+                                        sign = not sign
+                            sign = True
+                            if sign:
+                                self.Hamiltonian[i, j] -= Hund_J
+                            else:
+                                self.Hamiltonian[i, j] += Hund_J
+
                         if create == annihilation and annihi == creation:
-                            self.Hamiltonian[j, i] += Hund_J
+                            sign = False
+                            for i_create in sorted(list(create), reverse=True):
+                                for i_bj in self.basis[j]:
+                                    if i_bj == i_create:
+                                        break
+                                    else:
+                                        sign = not sign
+                            for i_annihi in sorted(list(annihi), reverse=True):
+                                for i_bi in self.basis[i]:
+                                    if i_bi == i_annihi:
+                                        break
+                                    else:
+                                        sign = not sign
+                            sign = True
+                            if sign:
+                                self.Hamiltonian[j, i] -= Hund_J
+                            else:
+                                self.Hamiltonian[j, i] += Hund_J
 
     def Hubbard_ligand(self, Hubbard_U=0, Hund_J=0):
         Hubbard_U_prime = Hubbard_U - 2 * Hund_J

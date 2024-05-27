@@ -69,6 +69,13 @@ class SingleParticleHamiltonian:
                                                 [  0,     -1,      0,     1j,      0,      0],
                                                 [  1,      0,     1j,      0,      0,      0]], dtype=np.complex128)
 
+        #soc_matrix = lambda_value/2 * np.array([[  0,      0,    -1j,      0,      0,     -1],
+        #                                        [  0,      0,      0,     1j,      1,      0],
+        #                                        [ 1j,      0,      0,      0,      0,     1j],
+        #                                        [  0,    -1j,      0,      0,     1j,      0],
+        #                                        [  0,      1,      0,    -1j,      0,      0],
+        #                                        [ -1,      0,    -1j,      0,      0,      0]], dtype=np.complex128)
+
         to = self.__total_orbs
         for i in range(0, self.num_sites):
             index_m = [[i*3,        i*3,        i*3,        i*3,        i*3,        i*3],
@@ -84,6 +91,64 @@ class SingleParticleHamiltonian:
                        [i*3,        i*3+to,     i*3+1,      i*3+1+to,   i*3+2,      i*3+2+to],
                        [i*3,        i*3+to,     i*3+1,      i*3+1+to,   i*3+2,      i*3+2+to],
                        [i*3,        i*3+to,     i*3+1,      i*3+1+to,   i*3+2,      i*3+2+to]]
+            self.Hamiltonian[index_m, index_n] += soc_matrix
+
+    def SOC_d5(self, lambda_value):
+        # we assume the orbitals are ordered as d3z2-r2 dx2-y2 dyz dxz dxy
+        s3 = np.sqrt(3)
+        soc_matrix = lambda_value/2 * np.array(
+            [
+                #[     0,     0,      0,       0,      0, -s3*1j,      0,     s3,      0,      0],
+                #[     0,     0,      0,       0, -s3*1j,      0,    -s3,      0,      0,      0],
+                #[     0,     0,      0,       0,      0,    -1j,      0,     -1,     2j,      0],
+                #[     0,     0,      0,       0,    -1j,      0,      1,      0,      0,    -2j],
+                #[     0, s3*1j,      0,      1j,      0,      0,    -1j,      0,      0,      1],
+                #[ s3*1j,     0,     1j,       0,      0,      0,      0,     1j,     -1,      0],
+                #[     0,   -s3,      0,       1,     1j,      0,      0,      0,      0,    -1j],
+                #[    s3,     0,     -1,       0,      0,    -1j,      0,      0,    -1j,      0],
+                #[     0,     0,    -2j,       0,      0,     -1,      0,     1j,      0,      0],
+                #[     0,     0,      0,      2j,      1,      0,     1j,      0,      0,      0]],
+
+                [0, 0, 0, 0, 0, 0, 0, s3*1j, 0, -s3],
+                [0, 0, 0, 0, 0, 0, s3*1j, 0, s3, 0],
+                [0, 0, 0, 0, 2j, 0, 0, 1, 0, -1j],
+                [0, 0, 0, 0, 0, -2j, -1, 0, -1j, 0],
+                [0, 0, -2j, 0, 0, 0, 0, 1j, 0, 1],
+                [0, 0, 0, 2j, 0, 0, 1j, 0, -1, 0],
+                [0, -s3*1j, 0, -1, 0, -1j, 0, 0, 1j, 0],
+                [-s3*1j, 0, 1, 0, -1j, 0, 0, 0, 0, -1j],
+                [0, s3, 0, 1j, 0, -1, -1j, 0, 0, 0],
+                [-s3, 0, 1j, 0, 1, 0, 0, 1j, 0, 0]
+            ],
+            dtype=np.complex128)
+
+        to = self.__total_orbs
+        for i in range(0, self.num_sites):
+            index_m = [
+                [i*5,       i*5,        i*5,        i*5,        i*5,        i*5,        i*5,        i*5,        i*5,        i*5],
+                [i*5+to,    i*5+to,     i*5+to,     i*5+to,     i*5+to,     i*5+to,     i*5+to,     i*5+to,     i*5+to,     i*5+to],
+                [i*5+1,     i*5+1,      i*5+1,      i*5+1,      i*5+1,      i*5+1,      i*5+1,      i*5+1,      i*5+1,      i*5+1],
+                [i*5+1+to,  i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to,   i*5+1+to],
+                [i*5+2,     i*5+2,      i*5+2,      i*5+2,      i*5+2,      i*5+2,      i*5+2,      i*5+2,      i*5+2,      i*5+2],
+                [i*5+2+to,  i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to,   i*5+2+to],
+                [i*5+3,     i*5+3,      i*5+3,      i*5+3,      i*5+3,      i*5+3,      i*5+3,      i*5+3,      i*5+3,      i*5+3],
+                [i*5+3+to,  i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to,   i*5+3+to],
+                [i*5+4,     i*5+4,      i*5+4,      i*5+4,      i*5+4,      i*5+4,      i*5+4,      i*5+4,      i*5+4,      i*5+4],
+                [i*5+4+to,  i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to,   i*5+4+to]
+            ]
+
+            index_n = [
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to],
+                [i*5,   i*5+to, i*5+1,  i*5+1+to,   i*5+2,  i*5+2+to,   i*5+3,  i*5+3+to,   i*5+4,  i*5+4+to]]
+
             self.Hamiltonian[index_m, index_n] += soc_matrix
 
     def SOC_l2(self, lambda_value):
