@@ -191,7 +191,7 @@ class Hubbard:
                             self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
                             self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
 
-    def Hubbard(self, Hubbard_U=0, Hund_J=0):
+    def Hubbard(self, Hubbard_U=0, Hund_J=0, num_orbs=0, shift=0):
         if self.__symbolic:
             Hubbard_U = sympy.symbols('U')
             Hund_J = sympy.symbols("J_H")
@@ -202,11 +202,11 @@ class Hubbard:
             Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
             #Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime
             #Hund_J = 0
-        intra_orbital_list = IntraOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_list = InterOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_hund_list = InterOrbitalHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        intra_orbital_annihilation, intra_orbital_creation = IntraOrbitalHoppingHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_annihilation, inter_orbital_creation = InterOrbitalHoppingHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
+        intra_orbital_list = IntraOrbital(num_orbs, shift)
+        inter_orbital_list = InterOrbital(num_orbs, shift)
+        inter_orbital_hund_list = InterOrbitalHund(num_orbs, shift)
+        intra_orbital_annihilation, intra_orbital_creation = IntraOrbitalHoppingHund(num_orbs, shift)
+        inter_orbital_annihilation, inter_orbital_creation = InterOrbitalHoppingHund(num_orbs, shift)
         for i in range(0, self.dimension):
             basis = set(self.basis[i])
             # intra orbital
@@ -248,12 +248,10 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            #print(sign)
-                            sign = True
                             if sign:
-                                self.Hamiltonian[i, j] -= Hund_J
-                            else:
                                 self.Hamiltonian[i, j] += Hund_J
+                            else:
+                                self.Hamiltonian[i, j] -= Hund_J
 
                         if create == annihilation and annihi == creation:
                             #print(create)
@@ -270,12 +268,10 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            #print(sign)
-                            sign = True
                             if sign:
-                                self.Hamiltonian[j, i] -= Hund_J
-                            else:
                                 self.Hamiltonian[j, i] += Hund_J
+                            else:
+                                self.Hamiltonian[j, i] -= Hund_J
 
                     # inter orbital
                     for annihilation, creation in zip(inter_orbital_annihilation, inter_orbital_creation):
@@ -293,7 +289,6 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            sign = True
                             if sign:
                                 self.Hamiltonian[i, j] -= Hund_J
                             else:
@@ -313,13 +308,13 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            sign = True
                             if sign:
                                 self.Hamiltonian[j, i] -= Hund_J
                             else:
                                 self.Hamiltonian[j, i] += Hund_J
 
     def Hubbard_ligand(self, Hubbard_U=0, Hund_J=0):
+        #FIXME: rearrange orbitals
         Hubbard_U_prime = Hubbard_U - 2 * Hund_J
         Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
 
@@ -376,6 +371,7 @@ class Hubbard:
                             self.Hamiltonian[j, i] += Hund_J
 
     def HubbardCentralAndLigand(self, Hubbard_U=0):
+        #FIXME: rearrange orbitals
         num_central_orbs = self.num_sites * self.num_orbs_per_site
         num_ligand_orbs = self.num_ligands * self.num_orbs_per_ligand
         central_orbs = list(range(0, num_central_orbs))

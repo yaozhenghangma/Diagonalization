@@ -22,19 +22,16 @@ class SingleParticleHamiltonian:
             self.__total_orbs += num_orbs_per_ligand * num_ligands
             self.Hamiltonian = np.zeros((self.__total_orbs*2, self.__total_orbs*2), dtype=np.complex128)
 
-    def OnSite(self, on_site_matrix):
+    def OnSite(self, on_site_matrix, shift=0):
+        num_orbs = on_site_matrix.shape[0]*2
         # spin up
-        for i in range(0, self.num_sites):
-            self.Hamiltonian[(i*self.num_orbs_per_site):(i*self.num_orbs_per_site+self.num_orbs_per_site),
-            (i*self.num_orbs_per_site):(i*self.num_orbs_per_site+self.num_orbs_per_site)] = on_site_matrix
-
+        self.Hamiltonian[range(shift, shift+num_orbs, 2), range(shift, shift+num_orbs, 2)] += on_site_matrix
         # spin down
-        for i in range(0, self.num_sites):
-            self.Hamiltonian[(i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs),
-            (i*self.num_orbs_per_site+self.__total_orbs):(i*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs)] = on_site_matrix
+        self.Hamiltonian[range(shift+1, shift+num_orbs, 2), range(shift+1, shift+num_orbs, 2)] += on_site_matrix
         return np.diag(self.Hamiltonian)
 
     def OnSiteLigand(self, on_site_matrix):
+        # FIXME: rearrange creation operator
         # spin up
         for i in range(0, self.num_ligands):
             self.Hamiltonian[(i * self.num_orbs_per_site + self.__central_orbs):(
@@ -51,14 +48,17 @@ class SingleParticleHamiltonian:
                 = on_site_matrix
         return np.diag(self.Hamiltonian)
 
-    def Hopping(self, hopping_matrix, site_m, site_n):
+    def Hopping(self, hopping_matrix, shift_m=0, shift_n=0):
+        # m*n hopping matrix
+        num_orbs_m = hopping_matrix.shape[0]*2
+        num_orbs_n = hopping_matrix.shape[1]*2
         # spin up
-        self.Hamiltonian[(site_m*self.num_orbs_per_site):(site_m*self.num_orbs_per_site+self.num_orbs_per_site),
-        (site_n*self.num_orbs_per_site):(site_n*self.num_orbs_per_site+self.num_orbs_per_site)] += hopping_matrix
+        self.Hamiltonian[range(shift_m, shift_m+num_orbs_m, 2), range(shift_n, shift_n+num_orbs_n, 2)] += hopping_matrix
+        self.Hamiltonian[range(shift_n, shift_n+num_orbs_n, 2), range(shift_m, shift_m+num_orbs_m, 2)] += hopping_matrix.conj().T
 
         # spin down
-        self.Hamiltonian[(site_m*self.num_orbs_per_site+self.__total_orbs):(site_m*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs),
-        (site_n*self.num_orbs_per_site+self.__total_orbs):(site_n*self.num_orbs_per_site+self.num_orbs_per_site+self.__total_orbs)] += hopping_matrix
+        self.Hamiltonian[range(shift_m+1, shift_m+num_orbs_m, 2), range(shift_n+1, shift_n+num_orbs_n, 2)] += hopping_matrix
+        self.Hamiltonian[range(shift_n+1, shift_n+num_orbs_n, 2), range(shift_m+1, shift_m+num_orbs_m, 2)] += hopping_matrix.conj().T
 
     def SOC(self, lambda_value):
         # we assume the orbitals of t2g are ordered as dyz dxz dxy
