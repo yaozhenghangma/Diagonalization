@@ -13,8 +13,10 @@ def J1_2(shift_orbs=0, num_orbs=3, symbolic=False):
     else:
         up_orbs = [2+shift_orbs, 1+num_orbs+shift_orbs, 0+num_orbs+shift_orbs]
         up_weight = np.array([1/np.sqrt(3), 1j/np.sqrt(3), 1/np.sqrt(3)], dtype=np.complex128)
+        #up_weight = np.array([1/np.sqrt(3), -1j/np.sqrt(3),-1/np.sqrt(3)], dtype=np.complex128)
         dn_orbs = [2+num_orbs+shift_orbs, 1+shift_orbs, 0+shift_orbs]
         dn_weight = np.array([1/np.sqrt(3), 1j/np.sqrt(3), -1/np.sqrt(3)], dtype=np.complex128)
+        #dn_weight = np.array([1/np.sqrt(3), -1j/np.sqrt(3), 1/np.sqrt(3)], dtype=np.complex128)
         return up_orbs, up_weight, dn_orbs, dn_weight
 
 
