@@ -43,44 +43,44 @@ class Hubbard:
         for i in range(0, self.dimension):
             self.Hamiltonian[i, i] += np.sum(on_site_energy[list(self.basis[i])])
 
-    def SOCd7(self, lam=0, to=5, shift=0):
+    def SOCd7(self, lam=0, shift=0):
         soc_basis = [
-            {0+shift,        1+shift,         2+shift},
-            {0+shift,        1+shift,         3+shift},
-            {0+shift,        1+shift,         4+shift},
-            {0+shift,        1+shift,         2+shift+to},
-            {0+shift,        1+shift,         3+shift+to},
-            {0+shift,        1+shift,         4+shift+to},
-            {0+shift,        1+shift+to,      2+shift},
-            {0+shift,        1+shift+to,      3+shift},
-            {0+shift,        1+shift+to,      4+shift},
-            {0+shift,        1+shift+to,      2+shift+to},
-            {0+shift,        1+shift+to,      3+shift+to},
-            {0+shift,        1+shift+to,      4+shift+to},
-            {0+shift+to,     1+shift,         2+shift},
-            {0+shift+to,     1+shift,         3+shift},
-            {0+shift+to,     1+shift,         4+shift},
-            {0+shift+to,     1+shift,         2+shift+to},
-            {0+shift+to,     1+shift,         3+shift+to},
-            {0+shift+to,     1+shift,         4+shift+to},
-            {0+shift+to,     1+shift+to,      2+shift},
-            {0+shift+to,     1+shift+to,      3+shift},
-            {0+shift+to,     1+shift+to,      4+shift},
-            {0+shift+to,     1+shift+to,      2+shift+to},
-            {0+shift+to,     1+shift+to,      3+shift+to},
-            {0+shift+to,     1+shift+to,      4+shift+to},
+            {0+shift,        2+shift,         4+shift},
+            {0+shift,        2+shift,         6+shift},
+            {0+shift,        2+shift,         8+shift},
+            {0+shift,        2+shift,         4+shift+1},
+            {0+shift,        2+shift,         6+shift+1},
+            {0+shift,        2+shift,         8+shift+1},
+            {0+shift,        2+shift+1,       4+shift},
+            {0+shift,        2+shift+1,       6+shift},
+            {0+shift,        2+shift+1,       8+shift},
+            {0+shift,        2+shift+1,       4+shift+1},
+            {0+shift,        2+shift+1,       6+shift+1},
+            {0+shift,        2+shift+1,       8+shift+1},
+            {0+shift+1,      2+shift,         4+shift},
+            {0+shift+1,      2+shift,         6+shift},
+            {0+shift+1,      2+shift,         8+shift},
+            {0+shift+1,      2+shift,         4+shift+1},
+            {0+shift+1,      2+shift,         6+shift+1},
+            {0+shift+1,      2+shift,         8+shift+1},
+            {0+shift+1,      2+shift+1,       4+shift},
+            {0+shift+1,      2+shift+1,       6+shift},
+            {0+shift+1,      2+shift+1,       8+shift},
+            {0+shift+1,      2+shift+1,       4+shift+1},
+            {0+shift+1,      2+shift+1,       6+shift+1},
+            {0+shift+1,      2+shift+1,       8+shift+1},
         ]
         site_orbitals = {
             0+shift,
-            1+shift,
             2+shift,
-            3+shift,
             4+shift,
-            0 + shift+to,
-            1 + shift+to,
-            2 + shift+to,
-            3 + shift+to,
-            4 + shift+to
+            6+shift,
+            8+shift,
+            0 + shift+1,
+            2 + shift+1,
+            4 + shift+1,
+            6 + shift+1,
+            8 + shift+1
         }
         s3 = np.sqrt(3)
         s3j = np.sqrt(3) * 1j
@@ -170,8 +170,8 @@ class Hubbard:
                             self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
                             self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
                         else:
-                            self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
-                            self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
+                            self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
                     else:
                         si = False
                         for i_bi in self.basis[i]:
