@@ -3,35 +3,24 @@ import sympy
 from Diagonalization.states.multi_electrons import ChooseState
 
 
-def J1_2(shift_orbs=0, num_orbs=3, symbolic=False):
-    if symbolic:
-        up_orbs = [2 + shift_orbs, 1 + num_orbs + shift_orbs, 0 + num_orbs + shift_orbs]
-        up_weight = sympy.Matrix([1 / sympy.sqrt(3), 1j / sympy.sqrt(3), 1 / sympy.sqrt(3)])
-        dn_orbs = [2 + num_orbs + shift_orbs, 1 + shift_orbs, 0 + shift_orbs]
-        dn_weight = sympy.Matrix([1 / sympy.sqrt(3), 1j / sympy.sqrt(3), -1 / sympy.sqrt(3)])
-        return up_orbs, up_weight, dn_orbs, dn_weight
-    else:
-        up_orbs = [2+shift_orbs, 1+num_orbs+shift_orbs, 0+num_orbs+shift_orbs]
-        up_weight = np.array([1/np.sqrt(3), 1j/np.sqrt(3), 1/np.sqrt(3)], dtype=np.complex128)
-        dn_orbs = [2+num_orbs+shift_orbs, 1+shift_orbs, 0+shift_orbs]
-        dn_weight = np.array([1/np.sqrt(3), 1j/np.sqrt(3), -1/np.sqrt(3)], dtype=np.complex128)
-        return up_orbs, up_weight, dn_orbs, dn_weight
+def J1_2(shift=0):
+    up_orbs = [0+shift, 2+shift, 5+shift]
+    up_weight = np.array([1/np.sqrt(3), -1j/np.sqrt(3), -1/np.sqrt(3)], dtype=np.complex128)
+    dn_orbs = [1+shift, 3+shift, 4+shift]
+    dn_weight = np.array([-1j/np.sqrt(3), 1/np.sqrt(3), -1j/np.sqrt(3)], dtype=np.complex128)
+    return up_orbs, up_weight, dn_orbs, dn_weight
 
 
-def TwoSiteJ(basis, symbolic=False, num_orbs=6):
-    up_orbs1, up_weight1, dn_orbs1, dn_weight1 = J1_2(0, num_orbs, symbolic)
-    up_orbs2, up_weight2, dn_orbs2, dn_weight2 = J1_2(3, num_orbs, symbolic)
+def TwoSiteJ(basis):
+    up_orbs1, up_weight1, dn_orbs1, dn_weight1 = J1_2(0)
+    up_orbs2, up_weight2, dn_orbs2, dn_weight2 = J1_2(6)
 
-    if symbolic:
-        state1 = sympy.Matrix.zeros(len(basis), 1)
-        state2 = sympy.Matrix.zeros(len(basis), 1)
-        state3 = sympy.Matrix.zeros(len(basis), 1)
-        state4 = sympy.Matrix.zeros(len(basis), 1)
-    else:
-        state1 = np.zeros((len(basis), 1), dtype=np.complex128)
-        state2 = np.zeros((len(basis), 1), dtype=np.complex128)
-        state3 = np.zeros((len(basis), 1), dtype=np.complex128)
-        state4 = np.zeros((len(basis), 1), dtype=np.complex128)
+
+    state1 = np.zeros((len(basis), 1), dtype=np.complex128)
+    state2 = np.zeros((len(basis), 1), dtype=np.complex128)
+    state3 = np.zeros((len(basis), 1), dtype=np.complex128)
+    state4 = np.zeros((len(basis), 1), dtype=np.complex128)
+
     # up-dn
     for i in range(0, 3):
         for j in range(0, 3):

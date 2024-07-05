@@ -43,44 +43,44 @@ class Hubbard:
         for i in range(0, self.dimension):
             self.Hamiltonian[i, i] += np.sum(on_site_energy[list(self.basis[i])])
 
-    def SOCd7(self, lam=0, to=5, shift=0):
+    def SOCd7(self, lam=0, shift=0):
         soc_basis = [
-            {0+shift,        1+shift,         2+shift},
-            {0+shift,        1+shift,         3+shift},
-            {0+shift,        1+shift,         4+shift},
-            {0+shift,        1+shift,         2+shift+to},
-            {0+shift,        1+shift,         3+shift+to},
-            {0+shift,        1+shift,         4+shift+to},
-            {0+shift,        1+shift+to,      2+shift},
-            {0+shift,        1+shift+to,      3+shift},
-            {0+shift,        1+shift+to,      4+shift},
-            {0+shift,        1+shift+to,      2+shift+to},
-            {0+shift,        1+shift+to,      3+shift+to},
-            {0+shift,        1+shift+to,      4+shift+to},
-            {0+shift+to,     1+shift,         2+shift},
-            {0+shift+to,     1+shift,         3+shift},
-            {0+shift+to,     1+shift,         4+shift},
-            {0+shift+to,     1+shift,         2+shift+to},
-            {0+shift+to,     1+shift,         3+shift+to},
-            {0+shift+to,     1+shift,         4+shift+to},
-            {0+shift+to,     1+shift+to,      2+shift},
-            {0+shift+to,     1+shift+to,      3+shift},
-            {0+shift+to,     1+shift+to,      4+shift},
-            {0+shift+to,     1+shift+to,      2+shift+to},
-            {0+shift+to,     1+shift+to,      3+shift+to},
-            {0+shift+to,     1+shift+to,      4+shift+to},
+            {0+shift,        2+shift,         4+shift},
+            {0+shift,        2+shift,         6+shift},
+            {0+shift,        2+shift,         8+shift},
+            {0+shift,        2+shift,         4+shift+1},
+            {0+shift,        2+shift,         6+shift+1},
+            {0+shift,        2+shift,         8+shift+1},
+            {0+shift,        2+shift+1,       4+shift},
+            {0+shift,        2+shift+1,       6+shift},
+            {0+shift,        2+shift+1,       8+shift},
+            {0+shift,        2+shift+1,       4+shift+1},
+            {0+shift,        2+shift+1,       6+shift+1},
+            {0+shift,        2+shift+1,       8+shift+1},
+            {0+shift+1,      2+shift,         4+shift},
+            {0+shift+1,      2+shift,         6+shift},
+            {0+shift+1,      2+shift,         8+shift},
+            {0+shift+1,      2+shift,         4+shift+1},
+            {0+shift+1,      2+shift,         6+shift+1},
+            {0+shift+1,      2+shift,         8+shift+1},
+            {0+shift+1,      2+shift+1,       4+shift},
+            {0+shift+1,      2+shift+1,       6+shift},
+            {0+shift+1,      2+shift+1,       8+shift},
+            {0+shift+1,      2+shift+1,       4+shift+1},
+            {0+shift+1,      2+shift+1,       6+shift+1},
+            {0+shift+1,      2+shift+1,       8+shift+1},
         ]
         site_orbitals = {
             0+shift,
-            1+shift,
             2+shift,
-            3+shift,
             4+shift,
-            0 + shift+to,
-            1 + shift+to,
-            2 + shift+to,
-            3 + shift+to,
-            4 + shift+to
+            6+shift,
+            8+shift,
+            0 + shift+1,
+            2 + shift+1,
+            4 + shift+1,
+            6 + shift+1,
+            8 + shift+1
         }
         s3 = np.sqrt(3)
         s3j = np.sqrt(3) * 1j
@@ -158,8 +158,11 @@ class Hubbard:
         #print(count)
 
 
-    def Hopping(self, hopping_matrix, sign=True):
+    def Hopping(self, hopping_matrix, sign=True, diag=False):
         for i in range(0, self.dimension):
+            if diag:
+                for create in list(set(self.basis[i])):
+                    self.Hamiltonian[i, i] += hopping_matrix[create, create]
             for j in range(i+1, self.dimension):
                 diff_set = list(set(self.basis[i]).symmetric_difference(set(self.basis[j])))
                 if len(diff_set) == 2:
@@ -170,8 +173,8 @@ class Hubbard:
                             self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
                             self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
                         else:
-                            self.Hamiltonian[i, j] -= hopping_matrix[create, annihi]
-                            self.Hamiltonian[j, i] -= hopping_matrix[annihi, create]
+                            self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
+                            self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
                     else:
                         si = False
                         for i_bi in self.basis[i]:
@@ -191,7 +194,7 @@ class Hubbard:
                             self.Hamiltonian[i, j] += hopping_matrix[create, annihi]
                             self.Hamiltonian[j, i] += hopping_matrix[annihi, create]
 
-    def Hubbard(self, Hubbard_U=0, Hund_J=0):
+    def Hubbard(self, Hubbard_U=0, Hund_J=0, num_orbs=0, shift=0):
         if self.__symbolic:
             Hubbard_U = sympy.symbols('U')
             Hund_J = sympy.symbols("J_H")
@@ -202,11 +205,11 @@ class Hubbard:
             Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
             #Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime
             #Hund_J = 0
-        intra_orbital_list = IntraOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_list = InterOrbital(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_hund_list = InterOrbitalHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        intra_orbital_annihilation, intra_orbital_creation = IntraOrbitalHoppingHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
-        inter_orbital_annihilation, inter_orbital_creation = InterOrbitalHoppingHund(self.num_sites, self.num_orbs_per_site, self.__total_orbs)
+        intra_orbital_list = IntraOrbital(num_orbs, shift)
+        inter_orbital_list = InterOrbital(num_orbs, shift)
+        inter_orbital_hund_list = InterOrbitalHund(num_orbs, shift)
+        intra_orbital_annihilation, intra_orbital_creation = IntraOrbitalHoppingHund(num_orbs, shift)
+        inter_orbital_annihilation, inter_orbital_creation = InterOrbitalHoppingHund(num_orbs, shift)
         for i in range(0, self.dimension):
             basis = set(self.basis[i])
             # intra orbital
@@ -248,12 +251,10 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            #print(sign)
-                            sign = True
                             if sign:
-                                self.Hamiltonian[i, j] -= Hund_J
-                            else:
                                 self.Hamiltonian[i, j] += Hund_J
+                            else:
+                                self.Hamiltonian[i, j] -= Hund_J
 
                         if create == annihilation and annihi == creation:
                             #print(create)
@@ -270,12 +271,10 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            #print(sign)
-                            sign = True
                             if sign:
-                                self.Hamiltonian[j, i] -= Hund_J
-                            else:
                                 self.Hamiltonian[j, i] += Hund_J
+                            else:
+                                self.Hamiltonian[j, i] -= Hund_J
 
                     # inter orbital
                     for annihilation, creation in zip(inter_orbital_annihilation, inter_orbital_creation):
@@ -293,7 +292,6 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            sign = True
                             if sign:
                                 self.Hamiltonian[i, j] -= Hund_J
                             else:
@@ -313,13 +311,13 @@ class Hubbard:
                                         break
                                     else:
                                         sign = not sign
-                            sign = True
                             if sign:
                                 self.Hamiltonian[j, i] -= Hund_J
                             else:
                                 self.Hamiltonian[j, i] += Hund_J
 
     def Hubbard_ligand(self, Hubbard_U=0, Hund_J=0):
+        #FIXME: rearrange orbitals
         Hubbard_U_prime = Hubbard_U - 2 * Hund_J
         Hubbard_U_prime_minus_Hund_j = Hubbard_U_prime - Hund_J
 
@@ -376,6 +374,7 @@ class Hubbard:
                             self.Hamiltonian[j, i] += Hund_J
 
     def HubbardCentralAndLigand(self, Hubbard_U=0):
+        #FIXME: rearrange orbitals
         num_central_orbs = self.num_sites * self.num_orbs_per_site
         num_ligand_orbs = self.num_ligands * self.num_orbs_per_ligand
         central_orbs = list(range(0, num_central_orbs))
