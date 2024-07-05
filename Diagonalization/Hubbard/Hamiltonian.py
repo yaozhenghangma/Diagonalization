@@ -158,10 +158,11 @@ class Hubbard:
         #print(count)
 
 
-    def Hopping(self, hopping_matrix, sign=True):
+    def Hopping(self, hopping_matrix, sign=True, diag=False):
         for i in range(0, self.dimension):
-            for create in list(set(self.basis[i])):
-                self.Hamiltonian[i, i] += hopping_matrix[create, create]
+            if diag:
+                for create in list(set(self.basis[i])):
+                    self.Hamiltonian[i, i] += hopping_matrix[create, create]
             for j in range(i+1, self.dimension):
                 diff_set = list(set(self.basis[i]).symmetric_difference(set(self.basis[j])))
                 if len(diff_set) == 2:
