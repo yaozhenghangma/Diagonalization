@@ -109,19 +109,74 @@ class SingleParticleHamiltonian:
             np.repeat(np.expand_dims(np.arange(shift, shift+10),0), 10, axis=0).T,
             np.repeat(np.expand_dims(np.arange(shift, shift+10),0), 10, axis=0)] += soc_matrix
 
-    def SOC_l2(self, lambda_value, shift=0):
-        soc_matrix = lambda_value / 2 * np.array([
-                [0,         0, -1j, 0, 0, 0, 0, 0, 1j/2, 1 / 2],
-                [0,         0, 0, 0, 0, 0, 0, 0, (1j*np.sqrt(3))/2, -(np.sqrt(3)/2)],
-                [1j,        0, 0, 0, 0, 0, 0, 0, 1 / 2, -(1j/2)],
-                [0,         0, 0, 0, 1j/2, -(1j/2), -((1j*np.sqrt(3)) / 2), -(1/2), 0, 0],
-                [0,         0, 0, -(1j/2), 0, -(1 / 2), np.sqrt(3) / 2, 1j/2, 0, 0],
-                [0,         0, 0, 1j/ 2, -(1 / 2), 0, 0, 1j, 0, 0],
-                [0,         0, 0, (1j*np.sqrt(3)) / 2, np.sqrt(3) / 2, 0, 0, 0, 0, 0],
-                [0,         0, 0, -(1 / 2), -(1j/2), -1j, 0, 0, 0, 0],
-                [-(1j/2), -((1j*np.sqrt(3))/2), 1 / 2, 0, 0, 0, 0, 0, 0, -(1j/2)],
-                [1 / 2,     -(np.sqrt(3)/2), 1j/2, 0, 0, 0, 0, 0, 1j/2, 0]
-        ])
+    def Zeeman_d5(self, B=[0,0,0], shift=0):
+        # magnetic field in the unit of hbar/muB
+        gs = 2.0023193
+        gl = 1.0
+        Sz = np.array([
+            [1.0, 0.0],
+            [0.0, -1.0]
+        ]) * 0.5
+        Sx = np.array([
+            [0.0, 1.0],
+            [1.0, 0.0]
+        ]) * 0.5
+        Sy = np.array([
+            [0.0, 1.0],
+            [-1.0, 0.0]
+        ]) *(-0.5j)
+        SB = (Sx * B[0] + Sy * B[1] + Sz * B[2]) * gs
+
+        s3 = np.sqrt(3)
+        Lz = np.array(
+            [
+                [     0,     0,      0,       0,      0,      0,      0,      0,    -2j,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,      0,    -2j],
+                [     0,     0,      0,       0,      0,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,     1j,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,     1j,      0,      0],
+                [     0,     0,      0,       0,    -1j,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,    -1j,      0,      0,      0,      0],
+                [    2j,     0,      0,       0,      0,      0,      0,      0,      0,      0],
+                [     0,    2j,      0,       0,      0,      0,      0,      0,      0,      0]
+            ],
+            dtype=np.complex128)
+        Lx = np.array(
+            [
+                [     0,     0,      0,       0,     1j,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,     1j,      0,      0,      0,      0],
+                [     0,     0,      0,       0,  s3*1j,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,  s3*1j,      0,      0,      0,      0],
+                [   -1j,     0, -s3*1j,       0,      0,      0,      0,      0,      0,      0],
+                [     0,   -1j,      0,  -s3*1j,      0,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,     1j,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,      0,     1j],
+                [     0,     0,      0,       0,      0,      0,    -1j,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,    -1j,      0,      0]
+            ],
+            dtype=np.complex128)
+        Ly = np.array(
+            [
+                [     0,     0,      0,       0,      0,      0,     1j,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,     1j,      0,      0],
+                [     0,     0,      0,       0,      0,      0, -s3*1j,      0,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0, -s3*1j,      0,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,    -1j,      0],
+                [     0,     0,      0,       0,      0,      0,      0,      0,      0,    -1j],
+                [   -1j,     0,  s3*1j,       0,      0,      0,      0,      0,      0,      0],
+                [     0,   -1j,      0,   s3*1j,      0,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,     1j,      0,      0,      0,      0,      0],
+                [     0,     0,      0,       0,      0,     1j,      0,      0,      0,      0]
+            ],
+            dtype=np.complex128)
+        LB = (Lx * B[0] + Ly * B[1] + Lz * B[2]) * gl
+
+        for i in range(0, 5):
+            self.Hamiltonian[
+                np.repeat(np.expand_dims(np.arange(shift+2*i, shift+2*i+2),0), 2, axis=0).T,
+                np.repeat(np.expand_dims(np.arange(shift+2*i, shift+2*i+2),0), 2, axis=0)
+            ] -= SB
         self.Hamiltonian[
             np.repeat(np.expand_dims(np.arange(shift, shift+10),0), 10, axis=0).T,
-            np.repeat(np.expand_dims(np.arange(shift, shift+10),0), 10, axis=0)] += soc_matrix
+            np.repeat(np.expand_dims(np.arange(shift, shift+10),0), 10, axis=0)] -= LB
