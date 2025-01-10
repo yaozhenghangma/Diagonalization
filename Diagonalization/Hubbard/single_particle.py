@@ -89,7 +89,7 @@ class SingleParticleHamiltonian:
 
     def SOC_d5(self, lambda_value, shift=0):
         s3 = np.sqrt(3)
-        # we assume the orbitals are ordered as d3z2-r2 dx2-y2 dyz dxz dxy
+        # we assume the orbitals are ordered as dx2-y2 d3z2-r2 dyz dxz dxy
         soc_matrix = lambda_value/2 * np.array(
             [
                 [     0,     0,      0,       0,      0,    -1j,      0,     -1,     2j,      0],
